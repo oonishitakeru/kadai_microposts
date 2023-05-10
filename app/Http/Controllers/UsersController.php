@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;                        // 追加
-use App\Models\User;                                        // 追加
+use App\Models\User;  
+use App\Models\Micropost;// 追加
 
 class UsersController extends Controller
 {
@@ -22,9 +23,63 @@ class UsersController extends Controller
     {            
         // 追加
         $user = User::findOrFail($id);
+        $user->loadRelationshipCounts();
+        $microposts = $user->microposts()->orderBy('created_at', 'desc')->paginate(10);
+
+        
+        
         
         return view('users.show',[
             'user' => $user,
-            ]);
+            'microposts' => $microposts,
+        ]);
     }                                                       // 追加
+    
+    /**
+     * ユーザのフォロー一覧ページを表示するアクション。
+     *
+     * @param  $id  ユーザのid
+     * @return \Illuminate\Http\Response
+     */
+    public function followings($id)
+    {
+        // idの値でユーザを検索して取得
+        $user = User::findOrFail($id);
+
+        // 関係するモデルの件数をロード
+        $user->loadRelationshipCounts();
+
+        // ユーザのフォロー一覧を取得
+        $followings = $user->followings()->paginate(10);
+
+        // フォロー一覧ビューでそれらを表示
+        return view('users.followings', [
+            'user' => $user,
+            'users' => $followings,
+        ]);
+    }
+
+    /**
+     * ユーザのフォロワー一覧ページを表示するアクション。
+     *
+     * @param  $id  ユーザのid
+     * @return \Illuminate\Http\Response
+     */
+    public function followers($id)
+    {
+        // idの値でユーザを検索して取得
+        $user = User::findOrFail($id);
+
+        // 関係するモデルの件数をロード
+        $user->loadRelationshipCounts();
+
+        // ユーザのフォロワー一覧を取得
+        $followers = $user->followers()->paginate(10);
+
+        // フォロワー一覧ビューでそれらを表示
+        return view('users.followers', [
+            'user' => $user,
+            'users' => $followers,
+        ]);
+    }
 }
