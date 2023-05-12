@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('microposts', function (Blueprint $table) {
             $table->id();
-            $table->unsigneBigInteger('user_id');
+            $table->foreignId('user_id');
             $table->string('content');
             $table->timestamps();
             
